@@ -14,7 +14,7 @@ This relates to the default 14-float form of NBT assigned to Display entities `{
 The program assumes all input values are equal to the sum of 1 or sinθ(90).
 
 ### Matrix form
-This relates to the raw data stored in a 4x4 affine rotation matrix denoted as a 16-float equivalent to the decomposed form `{transformation:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]`. It is by far the most efficient way to compute Euler rotations as of Minecraft 1.20.
+This relates to the raw data stored in a 4x4 affine rotation matrix denoted as a 16-float equivalent to the decomposed form `{transformation:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}`. It is by far the most efficient way to compute Euler rotations as of Minecraft 1.20.
 The program adopts an affine transform equation via matrix multiplication : `M' = M(t)M(s)M(θ)` (translation, scale, rotations) in vector component order (X -> Y -> Z -> W).
 
 ## Development information
