@@ -1,5 +1,5 @@
 # Transformation Normaliser
-Normalises transformation quaternions (decomposed / matrix form) for Minecraft display entities.
+Generates normalised transformation quaternions (decomposed / matrix form) for Minecraft display entities.
 
 ## Instructions
 - Open a console window (Terminal for Mac / CMD for Windows)
