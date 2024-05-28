@@ -1,11 +1,11 @@
 '''
 Title: Transformation Normaliser
 Author: Jatzylap
-Version: 1.0
+Version: 1.1
 '''
 
 import os
-from math import sqrt, sin, cos, radians, pi
+from math import sqrt, sin, cos, radians
 
 matrix = False
 
@@ -23,7 +23,7 @@ def clear_console():
 
 def check_mode():
     global matrix
-    mode = input("\n\nMode (D / M): ").strip().upper()
+    mode = input("\n\nMode (D / M): ").strip()
     if mode not in ['D', 'M']:
         raise InvalidMode(mode)
     matrix = (mode == 'M')
@@ -53,37 +53,22 @@ def rotation_inputs(rotation_side):
     x, y, z = get_float_input("X degrees: "), get_float_input("Y degrees: "), get_float_input("Z degrees: ")
     return x, y, z
 
-def normalise_components(x, y, z):
-    sum_value = abs(x + y + z)
-    remainder = 90 - sum_value
-    x, y, z = sin(radians(x/2)), sin(radians(y/2)), sin(radians(z/2))
-    if sum_value != 90:
-        if x+remainder < 1: x += remainder
-        elif y+remainder < 1: y += remainder
-        elif z+remainder < 1: z += remainder
-    squared_magnitude = x**2 + y**2 + z**2
-    w = sqrt(1 - squared_magnitude)
-    return round(x, 3), round(y, 3), round(z, 3), round(w, 3)
+def multiply_matrix(matA, matB):
+    if isinstance(matB[0], list):
+        result = [[0 for row in range(len(matB[0]))] for row in range(len(matA))]
+        for i in range(len(matA)):
+            for j in range(len(matB[0])):
+                for k in range(len(matB)):
+                    result[i][j] += matA[i][k] * matB[k][j]
+    else:
+        result = [0 for col in range(len(matA))]
+        for i in range(len(matA)):
+            for j in range(len(matA[0])):
+                result[i] += matA[i][j] * matB[j]
+    return result
 
-def multiply_matrix(mat0, mat1):
-    mat = [[0, 0, 0, 0] for row in range(4)]
-    for i in range(len(mat0)):
-        for j in range(len(mat1[0])):
-            for k in range(len(mat1)):
-                mat[i][j] += mat0[i][k] * mat1[k][j]
-    return mat
-
-def get_inputs():
-    translation, scale = translation_inputs(), scale_input()
-    left_rot, right_rot = rotation_inputs("Left"), rotation_inputs("Right")
-    return translation, scale, left_rot, right_rot
-
-def decomposed_quaternions():
-    q0, q1, q2, q3 = get_inputs()
-    q2, q3 = normalise_components(*q2), normalise_components(*q3)
-    return q0, q1, q2, q3
-
-def composed_quaternions():
+def get_matrices():
+    global matrix
     translation, scale, left_rot, right_rot = get_inputs()
     scale = (scale, scale, scale)
 
@@ -131,16 +116,39 @@ def composed_quaternions():
             [0,0,1,0],
             [0,0,0,1]]
 
-    # Multiply affine matrices
+    # Pre-multiply rotations
+    rr = multiply_matrix(multiply_matrix(rr_x, rr_y), rr_z)
+    lr = multiply_matrix(multiply_matrix(lr_x, lr_y), lr_z)
+    return tr, sc, rr, lr
+
+def get_inputs():
+    translation, scale = translation_inputs(), scale_input()
+    left_rot, right_rot = rotation_inputs("Left"), rotation_inputs("Right")
+    return translation, scale, left_rot, right_rot
+
+def normalise_vector(x, y, z):
+    x = sin(radians(x / 2))
+    y = sin(radians(y / 2))
+    z = sin(radians(z / 2))
+    squared_magnitude = x**2 + y**2 + z**2
+    if squared_magnitude > 1:
+        squared_magnitude = 1
+    w = sqrt(1 - squared_magnitude)
+    combined_magnitude = sqrt(x**2 + y**2 + z**2 + w**2)
+    x, y, z, w = x / combined_magnitude, y / combined_magnitude, z / combined_magnitude, w / combined_magnitude
+    vec = [round(x, 3), round(y, 3), round(z, 3), round(w, 3)]
+    return vec
+
+def decomposed_quaternions():
+    q0, q1, q2, q3 = get_inputs()
+    q2, q3 = normalise_vector(*q2), normalise_vector(*q3)
+    return q0, q1, q2, q3
+
+def composed_quaternions():
+    tr, sc, rr, lr = get_matrices()
     ts = multiply_matrix(tr, sc)
-    rr_xy = multiply_matrix(rr_x, rr_y)
-    rr = multiply_matrix(rr_xy, rr_z)
-    lr_xy = multiply_matrix(lr_x, lr_y)
-    lr = multiply_matrix(lr_xy, lr_z)
     r = multiply_matrix(lr, rr)
-
     rot_mat = multiply_matrix(ts, r)
-
     return rot_mat
 
 def main():
@@ -163,6 +171,7 @@ def main():
                 print(f"scale:[{scale}f,{scale}f,{scale}f],")
                 print(f"left_rotation:[{left_rot[0]}f,{left_rot[1]}f,{left_rot[2]}f,{left_rot[3]}f],")
                 print(f"right_rotation:[{right_rot[0]}f,{right_rot[1]}f,{right_rot[2]}f,{right_rot[3]}f]"+"}")
+
         except ValueError as e:
             print("EXCEPTION =>", e)
             break
