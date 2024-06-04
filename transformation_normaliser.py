@@ -1,7 +1,7 @@
 '''
 Title: Transformation Normaliser
 Author: Jatzylap
-Version: 1.1
+Version: 1.2
 '''
 
 import os
@@ -67,7 +67,7 @@ def multiply_matrix(matA, matB):
                 result[i] += matA[i][j] * matB[j]
     return result
 
-def get_matrices():
+def get_matrix():
     global matrix
     translation, scale, left_rot, right_rot = get_inputs()
     scale = (scale, scale, scale)
@@ -84,41 +84,28 @@ def get_matrices():
           [0,0,scale[2],0],
           [0,0,0,1]]
 
-    # Right rotations
-    rr_x = [[1,0,0,0],
-            [0,round(cos(radians(right_rot[0])),3),-round(sin(radians(right_rot[0])),3),0],
-            [0,round(sin(radians(right_rot[0])),3),round(cos(radians(right_rot[0])),3),0],
-            [0,0,0,1]]
+    lr = get_rotation_vector(*left_rot)
+    rr = get_rotation_vector(*right_rot)
 
-    rr_y = [[round(cos(radians(right_rot[1])),3),0,round(sin(radians(right_rot[1])),3),0],
-            [0,1,0,0],
-            [-round(sin(radians(right_rot[1])),3),0,round(cos(radians(right_rot[1])),3),0],
-            [0,0,0,1]]
+    def get_rotation_vector(x, y, z):
+        r_x = [[1,0,0,0],
+               [0,round(cos(radians(x)),3),-round(sin(radians(x)),3),0],
+               [0,round(sin(radians(x)),3),round(cos(radians(x)),3),0],
+               [0,0,0,1]]
 
-    rr_z = [[round(cos(radians(right_rot[2])),3),-round(sin(radians(right_rot[2])),3),0,0],
-            [round(sin(radians(right_rot[2])),3),round(cos(radians(right_rot[2])),3),0,0],
-            [0,0,1,0],
-            [0,0,0,1]]
+        r_y = [[round(cos(radians(y)),3),0,round(sin(radians(y)),3),0],
+               [0,1,0,0],
+               [-round(sin(radians(y)),3),0,round(cos(radians(y)),3),0],
+               [0,0,0,1]]
 
-    # Left rotations
-    lr_x = [[1,0,0,0],
-            [0,round(cos(radians(left_rot[0])),3),-round(sin(radians(left_rot[0])),3),0],
-            [0,round(sin(radians(left_rot[0])),3),round(cos(radians(left_rot[0])),3),0],
-            [0,0,0,1]]
+        r_z = [[round(cos(radians(z)),3),-round(sin(radians(z)),3),0,0],
+               [round(sin(radians(z)),3),round(cos(radians(z)),3),0,0],
+               [0,0,1,0],
+               [0,0,0,1]]
 
-    lr_y = [[round(cos(radians(left_rot[1])),3),0,round(sin(radians(left_rot[1])),3),0],
-            [0,1,0,0],
-            [-round(sin(radians(left_rot[1])),3),0,round(cos(radians(left_rot[1])),3),0],
-            [0,0,0,1]]
+        rot = multiply_matrix(multiply_matrix(r_x, r_y), r_z)
+        return rot
 
-    lr_z = [[round(cos(radians(left_rot[2])),3),-round(sin(radians(left_rot[2])),3),0,0],
-            [round(sin(radians(left_rot[2])),3),round(cos(radians(left_rot[2])),3),0,0],
-            [0,0,1,0],
-            [0,0,0,1]]
-
-    # Pre-multiply rotations
-    rr = multiply_matrix(multiply_matrix(rr_x, rr_y), rr_z)
-    lr = multiply_matrix(multiply_matrix(lr_x, lr_y), lr_z)
     return tr, sc, rr, lr
 
 def get_inputs():
@@ -127,9 +114,7 @@ def get_inputs():
     return translation, scale, left_rot, right_rot
 
 def normalise_vector(x, y, z):
-    x = sin(radians(x / 2))
-    y = sin(radians(y / 2))
-    z = sin(radians(z / 2))
+    x, y, z = sin(radians(x / 2)), sin(radians(y / 2)), sin(radians(z / 2))
     squared_magnitude = x**2 + y**2 + z**2
     if squared_magnitude > 1:
         squared_magnitude = 1
@@ -145,7 +130,7 @@ def decomposed_quaternions():
     return q0, q1, q2, q3
 
 def composed_quaternions():
-    tr, sc, rr, lr = get_matrices()
+    tr, sc, rr, lr = get_matrix()
     ts = multiply_matrix(tr, sc)
     r = multiply_matrix(lr, rr)
     rot_mat = multiply_matrix(ts, r)
