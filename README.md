@@ -1,4 +1,4 @@
-# Transformation Normaliser
+ # Transformation Normaliser
 Generates normalised transformation quaternions (decomposed / matrix form) for Minecraft display entities.
 
 <img src="/src/thumbnail.png" alt="Image"/>
@@ -11,7 +11,7 @@ Select between the decomposed `D` or matrix `M` (composed) modes to generate the
 
 ### Decomposed form
 This relates to the default 14-float form of NBT assigned to Display entities `{transformation:{translation:[0f,0f,0f],scale:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f]}}` derived from a 4x4 affine rotation matrix. 
-The program assumes all input values are equal to the sum of 1 or sinθ(90).
+The program assumes that the sum of all squared input values (`x^2 + y^2 + z^2 + w^2`) is equal to 1 or sinθ(90).     
 
 ### Matrix form
 This relates to the raw data stored in a 4x4 affine rotation matrix denoted as a 16-float equivalent to the decomposed form `{transformation:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]}`. It is by far the most efficient way to compute Euler rotations as of Minecraft 1.20.
