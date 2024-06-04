@@ -7,7 +7,7 @@ Generates normalised transformation quaternions (decomposed / matrix form) for M
 - Run the script inside any command-line interface (Terminal for Mac / CMD for Windows)
 
 ## Basic information
-Select between the decomposed `D` or matrix `M` (composed) modes to generate the corresponding quaternions to paste as transformation NBT in-game.
+Select between the decomposed `D` or matrix `M` (composed) modes to generate the corresponding quaternions. Paste the output as transformation NBT in-game.
 
 ### Decomposed form
 This relates to the default 14-float form of NBT assigned to Display entities `{transformation:{translation:[0f,0f,0f],scale:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f]}}` derived from a 4x4 affine rotation matrix. 
