@@ -1,7 +1,7 @@
 '''
 Title: Transformation Normaliser
 Author: Jatzylap
-Version: 1.2
+Version: 1.3
 '''
 
 import os
@@ -87,31 +87,32 @@ def get_matrix():
     lr = get_rotation_vector(*left_rot)
     rr = get_rotation_vector(*right_rot)
 
-    def get_rotation_vector(x, y, z):
-        r_x = [[1,0,0,0],
-               [0,round(cos(radians(x)),3),-round(sin(radians(x)),3),0],
-               [0,round(sin(radians(x)),3),round(cos(radians(x)),3),0],
-               [0,0,0,1]]
-
-        r_y = [[round(cos(radians(y)),3),0,round(sin(radians(y)),3),0],
-               [0,1,0,0],
-               [-round(sin(radians(y)),3),0,round(cos(radians(y)),3),0],
-               [0,0,0,1]]
-
-        r_z = [[round(cos(radians(z)),3),-round(sin(radians(z)),3),0,0],
-               [round(sin(radians(z)),3),round(cos(radians(z)),3),0,0],
-               [0,0,1,0],
-               [0,0,0,1]]
-
-        rot = multiply_matrix(multiply_matrix(r_x, r_y), r_z)
-        return rot
-
     return tr, sc, rr, lr
+
+def get_rotation_vector(x, y, z):
+    r_x = [[1,0,0,0],
+           [0,round(cos(radians(x)),3),-round(sin(radians(x)),3),0],
+           [0,round(sin(radians(x)),3),round(cos(radians(x)),3),0],
+           [0,0,0,1]]
+
+    r_y = [[round(cos(radians(y)),3),0,round(sin(radians(y)),3),0],
+           [0,1,0,0],
+           [-round(sin(radians(y)),3),0,round(cos(radians(y)),3),0],
+           [0,0,0,1]]
+
+    r_z = [[round(cos(radians(z)),3),-round(sin(radians(z)),3),0,0],
+           [round(sin(radians(z)),3),round(cos(radians(z)),3),0,0],
+           [0,0,1,0],
+           [0,0,0,1]]
+           
+    rot = multiply_matrix(multiply_matrix(r_x, r_y), r_z)
+    return rot
 
 def get_inputs():
     translation, scale = translation_inputs(), scale_input()
     left_rot, right_rot = rotation_inputs("Left"), rotation_inputs("Right")
     return translation, scale, left_rot, right_rot
+    print(left_rot)
 
 def normalise_vector(x, y, z):
     x, y, z = sin(radians(x / 2)), sin(radians(y / 2)), sin(radians(z / 2))
